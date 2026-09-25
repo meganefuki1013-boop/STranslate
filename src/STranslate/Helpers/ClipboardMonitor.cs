@@ -88,7 +88,8 @@ public class ClipboardMonitor(Window window) : IDisposable
                 await Task.Delay(100);
                 var text = ClipboardHelper.GetText();
 
-                if (!string.IsNullOrWhiteSpace(text) && text != _lastText)
+                // 忽略本程序自身写入的内容（翻译后复制、剪贴板输出等），否则会无限循环触发翻译
+                if (!string.IsNullOrWhiteSpace(text) && text != _lastText && text != ClipboardHelper.LastSetText)
                 {
                     _lastText = text;
                     OnClipboardTextChanged?.Invoke(text);

@@ -129,8 +129,14 @@ public class ClipboardHelper
 
     // https://github.com/CopyText/TextCopy/blob/main/src/TextCopy/WindowsClipboard.cs
 
+    /// <summary>
+    ///     最近一次由本程序写入剪贴板的文本，供剪贴板监听忽略自身写入，避免“翻译→复制→再翻译”循环
+    /// </summary>
+    public static string? LastSetText { get; private set; }
+
     public static void SetText(string text)
     {
+        LastSetText = text;
         TryOpenClipboard();
 
         InnerSet(text);
