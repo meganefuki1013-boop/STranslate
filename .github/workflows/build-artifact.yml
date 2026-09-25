@@ -28,3 +28,9 @@ jobs:
       with:
         name: STranslate-win-x64
         path: src/.artifacts/Release/
+
+    - name: Upload Gemini plugin only
+      uses: actions/upload-artifact@v4
+      with:
+        name: Gemini-plugin-only
+        path: src/.artifacts/Release/Plugins/STranslate.Plugin.Translate.Gemini/
