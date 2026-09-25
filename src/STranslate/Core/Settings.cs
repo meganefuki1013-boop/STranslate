@@ -102,9 +102,9 @@ public partial class Settings : ObservableObject
 
     [ObservableProperty] public partial int HttpTimeout { get; set; } = 30;
 
-    [ObservableProperty] public partial LangEnum SourceLang { get; set; } = LangEnum.Auto;
+    [ObservableProperty] public partial LangEnum SourceLang { get; set; } = LangEnum.Japanese;
 
-    [ObservableProperty] public partial LangEnum TargetLang { get; set; } = LangEnum.Auto;
+    [ObservableProperty] public partial LangEnum TargetLang { get; set; } = LangEnum.English;
 
     /// <summary>
     ///     语种识别类型

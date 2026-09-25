@@ -70,6 +70,7 @@ public class Constant
         "2d6f6831fd114463bfdebfd8ee85e549", //MicrosoftBuiltIn
         "2cc83275790ba8ce96b31c4fe0655743", //TransmartBuiltIn
         "9e44abfa040e443c9ab48205683082f4", //MTranServer
+        "40db478f7731484bb335ab3ddd7f5b7f", //Gemini
         "76b14a8d707041c891a2dcd2f74be9c1", //OpenAI
         "2c1b2a2fa1e24ae79b7dc73bdea35159", //YandexBuiltIn
         "6d90a1ae6fce5fe776f57961c5b8eef7", //Youdao
