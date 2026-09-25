@@ -1,5 +1,6 @@
 using STranslate.Plugin.Translate.Gemini.View;
 using STranslate.Plugin.Translate.Gemini.ViewModel;
+using System.Net.Http;
 using System.Text;
 using System.Windows.Controls;
 
