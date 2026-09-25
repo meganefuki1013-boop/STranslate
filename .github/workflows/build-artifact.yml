@@ -1,0 +1,30 @@
+name: Build Artifact
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "claude/**"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Build
+      shell: pwsh
+      run: .\build.ps1 2.0.0
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: STranslate-win-x64
+        path: src/.artifacts/Release/
