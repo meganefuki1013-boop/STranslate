@@ -29,7 +29,7 @@ internal static class GeminiProtocol
         return $"{baseUrl}/models/{Uri.EscapeDataString(model)}:streamGenerateContent?alt=sse";
     }
 
-    internal static JsonObject CreateRequest(IReadOnlyCollection<PromptItem> messages, double temperature)
+    internal static JsonObject CreateRequest(IReadOnlyCollection<PromptItem> messages, double temperature, string? model = null)
     {
         var systemTexts = messages
             .Where(m => string.Equals(m.Role, "system", StringComparison.OrdinalIgnoreCase))
@@ -52,10 +52,14 @@ internal static class GeminiProtocol
             });
         }
 
+        var generationConfig = new JsonObject { ["temperature"] = temperature };
+        if (CreateThinkingConfig(model) is { } thinkingConfig)
+            generationConfig["thinkingConfig"] = thinkingConfig;
+
         var request = new JsonObject
         {
             ["contents"] = contents,
-            ["generationConfig"] = new JsonObject { ["temperature"] = temperature }
+            ["generationConfig"] = generationConfig
         };
 
         if (systemTexts.Count > 0)
@@ -67,6 +71,28 @@ internal static class GeminiProtocol
         }
 
         return request;
+    }
+
+    /// <summary>
+    /// 翻译无需推理，尽量关闭思考以降低首字延迟
+    /// </summary>
+    /// <remarks>
+    /// 2.5 Flash 系列可用 thinkingBudget=0 关闭；Gemini 3 Flash 系列使用 thinkingLevel=minimal；
+    /// Pro 系列不支持关闭思考，保持默认。
+    /// </remarks>
+    internal static JsonObject? CreateThinkingConfig(string? model)
+    {
+        if (string.IsNullOrWhiteSpace(model))
+            return null;
+
+        var name = model.Trim().ToLowerInvariant();
+        if (name.Contains("gemini-2.5-flash"))
+            return new JsonObject { ["thinkingBudget"] = 0 };
+
+        if (name.StartsWith("gemini-3") && name.Contains("flash"))
+            return new JsonObject { ["thinkingLevel"] = "minimal" };
+
+        return null;
     }
 
     internal static GeminiStreamEvent ParseStreamLine(string? line)

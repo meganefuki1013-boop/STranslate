@@ -163,7 +163,7 @@ public class Main : LlmTranslatePluginBase
         var model = string.IsNullOrWhiteSpace(Settings.Model) ? "gemini-2.5-flash" : Settings.Model.Trim();
         var url = GeminiProtocol.BuildFinalUrl(Settings.Url, model);
         var temperature = Math.Clamp(Settings.Temperature, 0, 2);
-        var content = GeminiProtocol.CreateRequest(messages, temperature);
+        var content = GeminiProtocol.CreateRequest(messages, temperature, model);
 
         var option = new Options
         {

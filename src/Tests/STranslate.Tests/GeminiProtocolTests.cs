@@ -35,6 +35,25 @@ public class GeminiProtocolTests
         Assert.Equal(0.5, request["generationConfig"]?["temperature"]?.GetValue<double>());
     }
 
+    [Theory]
+    [InlineData("gemini-2.5-flash", "thinkingBudget", "0")]
+    [InlineData("gemini-2.5-flash-lite", "thinkingBudget", "0")]
+    [InlineData("gemini-3-flash-preview", "thinkingLevel", "minimal")]
+    public void CreateRequest_DisablesThinkingForFlashModels(string model, string key, string expected)
+    {
+        var request = GeminiProtocol.CreateRequest([new PromptItem("user", "hello")], 0.5, model);
+
+        Assert.Equal(expected, request["generationConfig"]?["thinkingConfig"]?[key]?.ToString());
+    }
+
+    [Fact]
+    public void CreateRequest_KeepsDefaultThinkingForProModels()
+    {
+        var request = GeminiProtocol.CreateRequest([new PromptItem("user", "hello")], 0.5, "gemini-2.5-pro");
+
+        Assert.Null(request["generationConfig"]?["thinkingConfig"]);
+    }
+
     [Fact]
     public void ParseStreamLine_ReturnsTextAndSkipsThoughts()
     {
