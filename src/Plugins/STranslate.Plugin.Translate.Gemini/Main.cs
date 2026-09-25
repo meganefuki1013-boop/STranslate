@@ -160,6 +160,39 @@ public class Main : LlmTranslatePluginBase
         Action<string>? onTextUpdated,
         CancellationToken cancellationToken)
     {
+        var maxRetries = Math.Max(0, Settings.MaxRetries ?? 0);
+        var delay = Math.Max(0, Settings.RetryDelayMilliseconds);
+
+        for (var attempt = 0; ; attempt++)
+        {
+            var hasOutput = false;
+            try
+            {
+                return await ExecuteStreamingOnceAsync(messages, text =>
+                {
+                    hasOutput = true;
+                    onTextUpdated?.Invoke(text);
+                }, cancellationToken);
+            }
+            // Gemini 高峰期常见 503/500 等临时错误，尚未输出内容时自动重试
+            catch (HttpRequestException ex) when (!hasOutput && attempt < maxRetries && IsTransient(ex))
+            {
+                await Task.Delay(delay * (1 << attempt), cancellationToken);
+            }
+        }
+    }
+
+    private static bool IsTransient(HttpRequestException ex) => ex.StatusCode is
+        System.Net.HttpStatusCode.InternalServerError or
+        System.Net.HttpStatusCode.BadGateway or
+        System.Net.HttpStatusCode.ServiceUnavailable or
+        System.Net.HttpStatusCode.GatewayTimeout;
+
+    private async Task<string> ExecuteStreamingOnceAsync(
+        IReadOnlyCollection<PromptItem> messages,
+        Action<string>? onTextUpdated,
+        CancellationToken cancellationToken)
+    {
         var model = string.IsNullOrWhiteSpace(Settings.Model) ? "gemini-2.5-flash" : Settings.Model.Trim();
         var url = GeminiProtocol.BuildFinalUrl(Settings.Url, model);
         var temperature = Math.Clamp(Settings.Temperature, 0, 2);
