@@ -21,7 +21,10 @@ jobs:
 
     - name: Build
       shell: pwsh
-      run: .\build.ps1 2.0.0
+      run: |
+        .\build.ps1 2.0.0 | Tee-Object -FilePath build.log
+        # build.ps1 不会因编译失败而退出，这里显式检查
+        if (Select-String -Path build.log -Pattern 'Build FAILED' -Quiet) { exit 1 }
 
     - name: Upload
       uses: actions/upload-artifact@v4
@@ -29,20 +32,9 @@ jobs:
         name: STranslate-win-x64
         path: src/.artifacts/Release/
 
-    - name: Collect Gemini plugin
-      shell: pwsh
-      run: |
-        $dll = Get-ChildItem -Path src/.artifacts -Recurse -Filter STranslate.Plugin.Translate.Gemini.dll |
-          Where-Object { Test-Path (Join-Path $_.DirectoryName 'plugin.json') } |
-          Select-Object -First 1
-        if (-not $dll) { throw "Gemini plugin output not found" }
-        Write-Host "Found: $($dll.DirectoryName)"
-        New-Item -ItemType Directory -Force gemini-plugin | Out-Null
-        Copy-Item -Path (Join-Path $dll.DirectoryName '*') -Destination gemini-plugin -Recurse -Force
-
     - name: Upload Gemini plugin only
       uses: actions/upload-artifact@v4
       with:
         name: Gemini-plugin-only
-        path: gemini-plugin/
+        path: src/.artifacts/Release/Plugins/STranslate.Plugin.Translate.Gemini/
         if-no-files-found: error
